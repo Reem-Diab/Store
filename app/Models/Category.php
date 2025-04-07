@@ -9,6 +9,8 @@ class Category extends Model
 {
     use HasFactory;
 
-    // إضافة الحقول المسموح بتعبئتها
-    protected $fillable = ['name'];
+    protected $fillable = [
+        'name',
+        'user_id',
+    ];
 }

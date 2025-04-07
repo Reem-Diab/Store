@@ -10,8 +10,14 @@ class FrontController extends Controller
 {
     public function index(Request $request)
     {
-        // جلب جميع الفئات
-        $categories = Category::all();
+        // جلب أسماء الفئات بدون تكرار حسب الاسم فقط
+        $categories = Category::select('id', 'name')
+            ->whereIn('id', function ($query) {
+                $query->selectRaw('MIN(id)')
+                      ->from('categories')
+                      ->groupBy('name');
+            })
+            ->get();
 
         // فلترة المنتجات حسب الفئة إذا كانت موجودة
         if ($request->has('category_id') && $request->category_id != '') {
@@ -23,4 +29,3 @@ class FrontController extends Controller
         return view('home.index', compact('products', 'categories'));
     }
 }
-
