@@ -16,7 +16,7 @@ class CategoryController extends Controller
 
     public function index()
     {
-        $categories = Category::where('user_id', Auth::id())->paginate(5);
+        $categories = Category::where('user_id', Auth::id())->paginate(3);
         return view('admin.categories.index', compact('categories'));
     }
 
@@ -45,7 +45,7 @@ class CategoryController extends Controller
             'user_id' => Auth::id(),
         ]);
 
-        return redirect()->route('categories.index')->with('success', 'Category added successfully!');
+        return redirect()->route('categories.create')->with('success', 'Category added successfully!');
     }
 
     public function edit($id)

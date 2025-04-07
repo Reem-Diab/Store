@@ -16,15 +16,15 @@ class ProductController extends Controller
 
     public function index()
     {
-        // جلب المنتجات التي تخص المدير الحالي فقط
-        $products = Product::where('user_id', auth()->id())->paginate(5);
+        // جلب المنتجات التي تخص المدير الحالي فقط باستخدام Auth::user()
+        $products = Product::where('user_id', Auth::user()->id)->paginate(3);
         return view('admin.products.index', compact('products'));
     }
 
     public function create()
     {
-        // جلب الأصناف التي تخص المدير الحالي فقط
-        $categories = Category::where('user_id', auth()->id())->get();
+        // جلب الأصناف التي تخص المدير الحالي فقط باستخدام Auth::user()
+        $categories = Category::where('user_id', Auth::user()->id)->get();
         return view('admin.products.create', compact('categories'));
     }
 
@@ -38,17 +38,8 @@ class ProductController extends Controller
             'description' => 'nullable|string',
         ]);
 
-        // تحقق من ملكية الصنف
-        $category = Category::where('id', $request->category_id)
-            ->where('user_id', auth()->id())
-            ->first();
-
-        if (!$category) {
-            return redirect()->back()->with('error', 'هذا الصنف غير متاح لك.');
-        }
-
         // التحقق إذا كان المنتج بنفس الاسم موجودًا للمستخدم الحالي
-        $existingProduct = Product::where('user_id', auth()->id())
+        $existingProduct = Product::where('user_id', Auth::user()->id)
             ->where('name', $request->name)
             ->first();
 
@@ -63,17 +54,17 @@ class ProductController extends Controller
             'price' => $request->price,
             'quantity' => $request->quantity,
             'description' => $request->description,
-            'user_id' => auth()->id(),
+            'user_id' => Auth::user()->id,  // ربط المنتج بالمستخدم الحالي
         ]);
 
-        return redirect()->route('products.index')->with('success', 'تم إنشاء المنتج بنجاح!');
+        return redirect()->route('products.create')->with('success', 'تم إنشاء المنتج بنجاح!');
     }
 
     public function edit($id)
     {
-        // جلب المنتج الذي يخص المدير الحالي فقط
-        $product = Product::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
-        $categories = Category::where('user_id', auth()->id())->get();
+        // جلب المنتج الذي يخص المدير الحالي فقط باستخدام Auth::user()
+        $product = Product::where('id', $id)->where('user_id', Auth::user()->id)->firstOrFail();
+        $categories = Category::where('user_id', Auth::user()->id)->get();
         return view('admin.products.edit', compact('product', 'categories'));
     }
 
@@ -87,16 +78,7 @@ class ProductController extends Controller
             'description' => 'nullable|string',
         ]);
 
-        $product = Product::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
-
-        // تحقق من ملكية الصنف
-        $category = Category::where('id', $request->category_id)
-            ->where('user_id', auth()->id())
-            ->first();
-
-        if (!$category) {
-            return redirect()->back()->with('error', 'هذا الصنف غير متاح لك.');
-        }
+        $product = Product::where('id', $id)->where('user_id', Auth::user()->id)->firstOrFail();
 
         $product->update([
             'name' => $request->name,
@@ -111,8 +93,8 @@ class ProductController extends Controller
 
     public function destroy($id)
     {
-        // حذف المنتج الذي يخص المدير الحالي فقط
-        $product = Product::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
+        // حذف المنتج الذي يخص المدير الحالي فقط باستخدام Auth::user()
+        $product = Product::where('id', $id)->where('user_id', Auth::user()->id)->firstOrFail();
         $product->delete();
 
         return redirect()->route('products.index')->with('success', 'تم حذف المنتج بنجاح!');
